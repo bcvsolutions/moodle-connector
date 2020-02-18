@@ -38,9 +38,8 @@ public class DeleteUser {
 
 		HttpResponse<String> response = connection.get(uriBuilder.build().toString());
 
-		if (response.getStatus() != HttpStatus.SC_OK) {
+		if (response.getStatus() != HttpStatus.SC_OK || !response.getBody().equals("null")) {
 			throw connection.handleError(response, "delete");
 		}
-		// TODO moodle return 200 everytime as it looks, so check the body which should be empty in case the delete was successful
 	}
 }

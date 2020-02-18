@@ -35,6 +35,7 @@ import eu.bcvsolutions.idm.connector.moodle.model.ResponseUser;
 import eu.bcvsolutions.idm.connector.moodle.operation.CreateUser;
 import eu.bcvsolutions.idm.connector.moodle.operation.DeleteUser;
 import eu.bcvsolutions.idm.connector.moodle.operation.GetUser;
+import eu.bcvsolutions.idm.connector.moodle.operation.UpdateUser;
 import eu.bcvsolutions.idm.connector.moodle.util.MoodleUtils;
 
 /**
@@ -89,7 +90,16 @@ public class MoodleConnector implements Connector,
 			final Set<Attribute> replaceAttributes,
 			final OperationOptions options) {
 
-		return uid;
+		if (objectClass.is(ObjectClass.ACCOUNT_NAME)) {
+			UpdateUser updateUser = new UpdateUser(configuration);
+			try {
+				updateUser.updateUser(uid.getUidValue(), replaceAttributes);
+			} catch (URISyntaxException e) {
+				throw new ConnectorException("Error during preparing request URL:", e);
+			}
+			return uid;
+		}
+		throw new ConnectorException("Unsupported operation update for object class " + objectClass + "");
 	}
 
 	@Override
@@ -106,7 +116,7 @@ public class MoodleConnector implements Connector,
 				throw new ConnectorException("Error during preparing request URL:", e);
 			}
 		}
-		throw new ConnectorException("Unsupported operation create for object class " + objectClass + "");
+		throw new ConnectorException("Unsupported operation delete for object class " + objectClass + "");
 	}
 
 	@Override
