@@ -11,7 +11,9 @@ import org.identityconnectors.framework.common.objects.ResultsHandler;
 import org.identityconnectors.framework.common.objects.Uid;
 
 import eu.bcvsolutions.idm.connector.moodle.MoodleConfiguration;
-import eu.bcvsolutions.idm.connector.moodle.enmus.AttrNameEnum;
+import eu.bcvsolutions.idm.connector.moodle.enmus.GroupAttrNameEnum;
+import eu.bcvsolutions.idm.connector.moodle.enmus.UserAttrNameEnum;
+import eu.bcvsolutions.idm.connector.moodle.model.ResponseGroup;
 import eu.bcvsolutions.idm.connector.moodle.model.ResponseUser;
 
 /**
@@ -42,11 +44,30 @@ public class MoodleUtils {
 		builder.setUid(new Uid(String.valueOf(user.getId())));
 		builder.setName(user.getUsername());
 		builder.setObjectClass(objectClass);
-		builder.addAttribute(AttributeBuilder.build(AttrNameEnum.firstname.toString(), user.getFirstname()));
-		builder.addAttribute(AttributeBuilder.build(AttrNameEnum.lastname.toString(), user.getLastname()));
-		builder.addAttribute(AttributeBuilder.build(AttrNameEnum.lastname.toString(), user.getLastname()));
-		builder.addAttribute(AttributeBuilder.build(AttrNameEnum.email.toString(), user.getEmail()));
-		builder.addAttribute(AttributeBuilder.build(AttrNameEnum.username.toString(), user.getUsername()));
+		builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.firstname.toString(), user.getFirstname()));
+		builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.lastname.toString(), user.getLastname()));
+		builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.lastname.toString(), user.getLastname()));
+		builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.email.toString(), user.getEmail()));
+		builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.username.toString(), user.getUsername()));
+
+		if (user.getRoles() != null) {
+			builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.roles.toString(), user.getRoles()));
+		}
+
+		handler.handle(builder.build());
+	}
+
+	public void handleGroup(ObjectClass objectClass, ResultsHandler handler, ResponseGroup group) {
+		ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
+		builder.setUid(new Uid(String.valueOf(group.getId())));
+		builder.setName(String.valueOf(group.getId()));
+		builder.setObjectClass(objectClass);
+		builder.addAttribute(AttributeBuilder.build(GroupAttrNameEnum.id.toString(), group.getId()));
+		builder.addAttribute(AttributeBuilder.build(GroupAttrNameEnum.name.toString(), group.getName()));
+		builder.addAttribute(AttributeBuilder.build(GroupAttrNameEnum.description.toString(), group.getDescription()));
+		builder.addAttribute(AttributeBuilder.build(GroupAttrNameEnum.descriptionformat.toString(), group.getDescriptionformat()));
+		builder.addAttribute(AttributeBuilder.build(GroupAttrNameEnum.visible.toString(), group.getVisible()));
+		builder.addAttribute(AttributeBuilder.build(GroupAttrNameEnum.theme.toString(), group.getTheme()));
 		handler.handle(builder.build());
 	}
 }

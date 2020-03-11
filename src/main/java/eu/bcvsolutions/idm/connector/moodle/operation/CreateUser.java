@@ -19,7 +19,7 @@ import com.mashape.unirest.http.HttpResponse;
 
 import eu.bcvsolutions.idm.connector.moodle.MoodleConfiguration;
 import eu.bcvsolutions.idm.connector.moodle.communication.Connection;
-import eu.bcvsolutions.idm.connector.moodle.enmus.AttrNameEnum;
+import eu.bcvsolutions.idm.connector.moodle.enmus.UserAttrNameEnum;
 import eu.bcvsolutions.idm.connector.moodle.model.ResponseUser;
 import eu.bcvsolutions.idm.connector.moodle.util.MoodleUtils;
 
@@ -48,9 +48,12 @@ public class CreateUser {
 
 		Map<String, Object> parameters = new HashMap<>();
 		createAttributes.forEach(attribute -> {
+			if (attribute.getName().equals(UserAttrNameEnum.roles.toString())) {
+				return;
+			}
 			StringBuilder key = new StringBuilder();
 			if (attribute.getName().equals("__PASSWORD__")) {
-				key.append("users[0][").append(AttrNameEnum.password.toString()).append("]");
+				key.append("users[0][").append(UserAttrNameEnum.password.toString()).append("]");
 				parameters.put(key.toString(), moodleUtils.getPassword((GuardedString) attribute.getValue().get(0)));
 			} else if (!attribute.getName().equals("__NAME__")){
 				key.append("users[0][").append(attribute.getName()).append("]");

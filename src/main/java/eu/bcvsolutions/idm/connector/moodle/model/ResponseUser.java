@@ -1,5 +1,7 @@
 package eu.bcvsolutions.idm.connector.moodle.model;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -36,6 +38,7 @@ public class ResponseUser {
 	private String identity;
 	@JsonIgnore
 	private Preference[] preferences;
+	private List<Integer> roles;
 
 	public int getId() {
 		return id;
@@ -267,5 +270,13 @@ public class ResponseUser {
 
 	public void setPreferences(Preference[] preferences) {
 		this.preferences = preferences;
+	}
+
+	public List<Integer> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(List<Integer> roles) {
+		this.roles = roles;
 	}
 }

@@ -11,6 +11,7 @@ public class MoodleConfiguration extends AbstractConfiguration {
     private String endpoint;
     private String user;
     private GuardedString token;
+    private String objectClass;
 
     @ConfigurationProperty(displayMessageKey = "moodle.connector.endpoint.display",
             helpMessageKey = "moodle.connector.endpoint.help", required = true, order = 1)
@@ -42,6 +43,16 @@ public class MoodleConfiguration extends AbstractConfiguration {
         this.token = token;
     }
 
+    @ConfigurationProperty(displayMessageKey = "moodle.connector.object.display",
+            helpMessageKey = "moodle.connector.object.help", required = true, order = 4)
+    public String getObjectClass() {
+        return objectClass;
+    }
+
+    public void setObjectClass(String objectClass) {
+        this.objectClass = objectClass;
+    }
+
     @Override
     public void validate() {
         if (StringUtil.isBlank(endpoint)) {
@@ -51,7 +62,10 @@ public class MoodleConfiguration extends AbstractConfiguration {
             throw new ConfigurationException("User must not be blank!");
         }
         if (getToken() == null) {
-            throw new ConfigurationException("Password must not be blank!");
+            throw new ConfigurationException("Token must not be blank!");
+        }
+        if (StringUtil.isBlank(objectClass)) {
+            throw new ConfigurationException("Object class must not be blank");
         }
     }
 

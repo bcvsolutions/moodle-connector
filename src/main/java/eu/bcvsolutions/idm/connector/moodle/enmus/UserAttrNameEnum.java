@@ -3,7 +3,7 @@ package eu.bcvsolutions.idm.connector.moodle.enmus;
 /**
  * @author Roman Kucera
  */
-public enum AttrNameEnum {
+public enum UserAttrNameEnum {
 	id,
 	createpassword,
 	username,
@@ -39,5 +39,6 @@ public enum AttrNameEnum {
 	theme,
 	mailformat,
 	customfields,
-	preferences
+	preferences,
+	roles
 }
