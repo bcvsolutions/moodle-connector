@@ -38,7 +38,7 @@ public class ResponseUser {
 	private String identity;
 	@JsonIgnore
 	private Preference[] preferences;
-	private List<Integer> roles;
+	private List<String> roles;
 
 	public int getId() {
 		return id;
@@ -272,11 +272,11 @@ public class ResponseUser {
 		this.preferences = preferences;
 	}
 
-	public List<Integer> getRoles() {
+	public List<String> getRoles() {
 		return roles;
 	}
 
-	public void setRoles(List<Integer> roles) {
+	public void setRoles(List<String> roles) {
 		this.roles = roles;
 	}
 }

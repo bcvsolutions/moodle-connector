@@ -66,9 +66,9 @@ public class GetUser {
 			}
 			if (!responseUsers.isEmpty()) {
 				ResponseUser responseUser = responseUsers.get(0);
-				List<Integer> roles = new ArrayList<>();
+				List<String> roles = new ArrayList<>();
 
-				getUserRoles(value, roles);
+				getUserRoles(responseUser.getId(), roles);
 
 				responseUser.setRoles(roles);
 				return responseUser;
@@ -80,37 +80,43 @@ public class GetUser {
 		}
 	}
 
-	private void getUserRoles(String value, List<Integer> roles) throws URISyntaxException {
+	private void getUserRoles(int value, List<String> roles) throws URISyntaxException {
 		URIBuilder uriBuilderGroup = moodleUtils.buildBaseUrl(configuration);
 		uriBuilderGroup.addParameter("wsfunction", getUserInGroup);
 		uriBuilderGroup.addParameter("moodlewsrestformat", "json");
 
 		GetGroup getGroup = new GetGroup(configuration);
 		List<ResponseGroup> groups = getGroup.getGroups();
-		groups.forEach(responseGroup -> {
-			Map<String, Object> parameters = new HashMap<>();
-			parameters.put("cohortids[0]", responseGroup.getId());
 
-			try {
-				HttpResponse<String> groupResponse = connection.post(uriBuilderGroup.build().toString(), parameters);
-				if (groupResponse.getStatus() == HttpStatus.SC_OK) {
-					getUserGroupsFromResponse(value, roles, groupResponse);
-				} else {
-					throw connection.handleError(groupResponse, "get group users");
-				}
-			} catch (URISyntaxException e) {
-				LOG.error("Error during building uri for getting groups users", e);
+		Map<String, Object> parameters = new HashMap<>();
+		for (int i = 0; i < groups.size(); i++) {
+			parameters.put("cohortids[" + i + "]", groups.get(i).getId());
+		}
+
+		try {
+			HttpResponse<String> groupResponse = connection.post(uriBuilderGroup.build().toString(), parameters);
+			if (groupResponse.getStatus() == HttpStatus.SC_OK) {
+				getUserGroupsFromResponse(value, roles, groupResponse);
+			} else {
+				throw connection.handleError(groupResponse, "get group users");
 			}
-		});
+		} catch (URISyntaxException e) {
+			LOG.error("Error during building uri for getting groups users", e);
+		}
 	}
 
-	private void getUserGroupsFromResponse(String value, List<Integer> roles, HttpResponse<String> groupResponse) {
+	private void getUserGroupsFromResponse(int value, List<String> roles, HttpResponse<String> groupResponse) {
 		ObjectMapper mapperGroup = new ObjectMapper();
-		ResponseGroupUsers group;
+		List<ResponseGroupUsers> groupsList;
 		try {
-			group = mapperGroup.readValue(groupResponse.getBody(), ResponseGroupUsers.class);
-			if (group.getUserids() != null && !group.getUserids().isEmpty() && group.getUserids().contains(Integer.valueOf(value))) {
-				roles.add(group.getCohortid());
+			groupsList = mapperGroup.readValue(groupResponse.getBody(), new TypeReference<List<ResponseGroupUsers>>() {
+			});
+			if (groupsList != null && !groupsList.isEmpty()) {
+				groupsList.forEach(responseGroupUsers -> {
+					if (responseGroupUsers.getUserids() != null && !responseGroupUsers.getUserids().isEmpty() && responseGroupUsers.getUserids().contains(value)) {
+						roles.add(String.valueOf(responseGroupUsers.getCohortid()));
+					}
+				});
 			}
 		} catch (JsonProcessingException e) {
 			LOG.error("Error during parsing group users response, we will try to parse error now", e);

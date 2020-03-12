@@ -18,6 +18,7 @@ import com.mashape.unirest.http.HttpResponse;
 import eu.bcvsolutions.idm.connector.moodle.MoodleConfiguration;
 import eu.bcvsolutions.idm.connector.moodle.communication.Connection;
 import eu.bcvsolutions.idm.connector.moodle.enmus.GroupAttrNameEnum;
+import eu.bcvsolutions.idm.connector.moodle.enmus.UpdateGroupsOperationType;
 import eu.bcvsolutions.idm.connector.moodle.enmus.UserAttrNameEnum;
 import eu.bcvsolutions.idm.connector.moodle.model.ResponseUser;
 import eu.bcvsolutions.idm.connector.moodle.util.MoodleUtils;
@@ -73,35 +74,42 @@ public class UpdateUser {
 		}
 	}
 
-	public void updateGroups(String id, List<Integer> roles) throws URISyntaxException {
+	public void updateGroups(String id, List<String> roles) throws URISyntaxException {
 		// Get all users roles which he has on end system
 		GetUser getUser = new GetUser(configuration);
 		ResponseUser user = getUser.getUserByField(id, UserAttrNameEnum.id.toString());
-		List<Integer> rolesOnSystem = user.getRoles();
+		List<String> rolesOnSystem = user.getRoles();
 
-		List<Integer> toAdd = new ArrayList<>(roles);
-		List<Integer> toRemove = new ArrayList<>(rolesOnSystem);
+		List<String> toAdd = new ArrayList<>(roles);
+		List<String> toRemove = new ArrayList<>(rolesOnSystem);
 
 		toAdd.removeAll(rolesOnSystem);
 		toRemove.removeAll(roles);
 
-		updateRoles(id, toAdd, addUserToGroupFunction);
-		updateRoles(id, toRemove, deleteUserToGroupFunction);
+		updateRoles(id, toAdd, UpdateGroupsOperationType.add);
+		updateRoles(id, toRemove, UpdateGroupsOperationType.delete);
 	}
 
-	private void updateRoles(String id, List<Integer> roles, String function) {
+	private void updateRoles(String id, List<String> roles, UpdateGroupsOperationType type) {
 		roles.forEach(role -> {
 			URIBuilder uriBuilder;
 			try {
 				uriBuilder = moodleUtils.buildBaseUrl(configuration);
-				uriBuilder.addParameter("wsfunction", function);
 				uriBuilder.addParameter("moodlewsrestformat", "json");
 
 				Map<String, Object> parameters = new HashMap<>();
-				parameters.put("members[0][cohorttype][type]", GroupAttrNameEnum.id.toString());
-				parameters.put("members[0][cohorttype][value]", role);
-				parameters.put("members[0][usertype][type]", UserAttrNameEnum.id.toString());
-				parameters.put("members[0][usertype][value]", Integer.valueOf(id));
+				if (type.equals(UpdateGroupsOperationType.add)) {
+					uriBuilder.addParameter("wsfunction", addUserToGroupFunction);
+					parameters.put("members[0][cohorttype][type]", GroupAttrNameEnum.id.toString());
+					parameters.put("members[0][cohorttype][value]", Integer.valueOf(role));
+					parameters.put("members[0][usertype][type]", UserAttrNameEnum.id.toString());
+					parameters.put("members[0][usertype][value]", Integer.valueOf(id));
+				}
+				if (type.equals(UpdateGroupsOperationType.delete)) {
+					uriBuilder.addParameter("wsfunction", deleteUserToGroupFunction);
+					parameters.put("members[0][cohortid]", Integer.valueOf(role));
+					parameters.put("members[0][userid]", Integer.valueOf(id));
+				}
 
 				HttpResponse<String> response = connection.post(uriBuilder.build().toString(), parameters);
 			} catch (URISyntaxException e) {

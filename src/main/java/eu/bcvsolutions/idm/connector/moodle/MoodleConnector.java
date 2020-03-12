@@ -80,6 +80,14 @@ public class MoodleConnector implements Connector,
 			CreateUser createUser = new CreateUser(configuration);
 			try {
 				ResponseUser user = createUser.createUser(createAttributes);
+
+				Attribute rolesAttribute = createAttributes.stream().filter(attribute -> attribute.getName().equals(UserAttrNameEnum.roles.toString())).findFirst().orElse(null);
+				if (rolesAttribute != null && rolesAttribute.getValue() != null) {
+					List<String> rolesIds = rolesAttribute.getValue().stream().map(o -> (String) o).collect(Collectors.toList());
+					UpdateUser updateUser = new UpdateUser(configuration);
+					updateUser.updateGroups(String.valueOf(user.getId()), rolesIds);
+				}
+
 				return new Uid(String.valueOf(user.getId()));
 			} catch (URISyntaxException e) {
 				throw new ConnectorException("Error during preparing request URL:", e);
@@ -102,7 +110,7 @@ public class MoodleConnector implements Connector,
 				updateUser.updateUser(uid.getUidValue(), replaceAttributes);
 				Attribute rolesAttribute = replaceAttributes.stream().filter(attribute -> attribute.getName().equals(UserAttrNameEnum.roles.toString())).findFirst().orElse(null);
 				if (rolesAttribute != null && rolesAttribute.getValue() != null) {
-					List<Integer> rolesIds = rolesAttribute.getValue().stream().map(o -> (int) o).collect(Collectors.toList());
+					List<String> rolesIds = rolesAttribute.getValue().stream().map(o -> (String) o).collect(Collectors.toList());
 					updateUser.updateGroups(uid.getUidValue(), rolesIds);
 				}
 			} catch (URISyntaxException e) {
