@@ -12,7 +12,6 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
-import eu.bcvsolutions.idm.connector.moodle.MoodleConfiguration;
 import eu.bcvsolutions.idm.connector.moodle.model.Error;
 
 /**
@@ -99,9 +98,11 @@ public class Connection {
 			try {
 				ObjectMapper jsonObjectMapper = new ObjectMapper();
 
-				Error error = jsonObjectMapper.readValue(response.getBody().toString(), Error.class);
-				LOG.error("Operation {0} failed, error code: {1}, exception: {2}, message: {3}", operation, error.getErrorcode(), error.getException(), error.getMessage());
-				return new ConnectorException("Operation " + operation + " failed, error code: " + error.getErrorcode() + ",exception: " + error.getException() + ", message: " + error.getMessage());
+				Error error = jsonObjectMapper.readValue(response.getBody(), Error.class);
+				LOG.error("Operation {0} failed, error code: {1}, exception: {2}, message: {3}, debug: {4}", operation,
+						error.getErrorcode(), error.getException(), error.getMessage(), error.getDebuginfo());
+				return new ConnectorException("Operation " + operation + " failed, error code: " + error.getErrorcode() +
+						",exception: " + error.getException() + ", message: " + error.getMessage() + ", debug: " + error.getDebuginfo());
 			} catch (IOException ex) {
 				LOG.error("Can not parse error response for operation {0} " + ex, operation);
 				return new ConnectorException("Can not parse error response for operation " + operation);

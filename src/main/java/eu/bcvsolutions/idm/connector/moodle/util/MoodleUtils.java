@@ -46,9 +46,13 @@ public class MoodleUtils {
 		builder.setObjectClass(objectClass);
 		builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.firstname.toString(), user.getFirstname()));
 		builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.lastname.toString(), user.getLastname()));
-		builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.lastname.toString(), user.getLastname()));
 		builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.email.toString(), user.getEmail()));
 		builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.username.toString(), user.getUsername()));
+		builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.city.toString(), user.getCity()));
+		builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.country.toString(), user.getCountry()));
+		builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.department.toString(), user.getDepartment()));
+		builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.idnumber.toString(), user.getIdnumber()));
+		builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.timezone.toString(), user.getTimezone()));
 
 		if (user.getRoles() != null) {
 			builder.addAttribute(AttributeBuilder.build(UserAttrNameEnum.roles.toString(), user.getRoles()));
