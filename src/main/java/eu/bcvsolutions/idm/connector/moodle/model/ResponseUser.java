@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author Roman Kucera
+ * Model class for response of single user from API
  */
 public class ResponseUser {
 	private int id;

@@ -4,6 +4,7 @@ import java.util.List;
 
 /**
  * @author Roman Kucera
+ * Model class for response of group's members from API
  */
 public class ResponseGroupUsers {
 	private int cohortid;

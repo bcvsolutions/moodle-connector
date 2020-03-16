@@ -4,6 +4,7 @@ import java.util.List;
 
 /**
  * @author Roman Kucera
+ * Model class for response of all groups from API
  */
 public class ResponseAllGroups {
 	private List<ResponseGroup> cohorts;

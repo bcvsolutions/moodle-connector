@@ -77,22 +77,25 @@ public class MoodleConnector implements Connector,
 			final Set<Attribute> createAttributes,
 			final OperationOptions options) {
 		if (configuration.getObjectClass().equals(ObjectClassEnum.USER.toString())) {
+			LOG.info("Create started");
 			CreateUser createUser = new CreateUser(configuration);
 			try {
 				ResponseUser user = createUser.createUser(createAttributes);
+				LOG.info("User created");
 
 				Attribute rolesAttribute = createAttributes.stream().filter(attribute -> attribute.getName().equals(UserAttrNameEnum.roles.toString())).findFirst().orElse(null);
 				if (rolesAttribute != null && rolesAttribute.getValue() != null) {
+					LOG.info("User has some roles, we will perform groups assigning now");
 					List<String> rolesIds = rolesAttribute.getValue().stream().map(o -> (String) o).collect(Collectors.toList());
 					UpdateUser updateUser = new UpdateUser(configuration);
 					updateUser.updateGroups(String.valueOf(user.getId()), rolesIds);
+					LOG.info("Groups assigned");
 				}
 
 				return new Uid(String.valueOf(user.getId()));
 			} catch (URISyntaxException e) {
-				throw new ConnectorException("Error during preparing request URL:", e);
+				throw new ConnectorException("Error during preparing request URL: ", e);
 			}
-			// TODO if there are some roles we need to set them
 		}
 		throw new ConnectorException("Unsupported operation create for object class " + objectClass + "");
 	}
@@ -105,16 +108,21 @@ public class MoodleConnector implements Connector,
 			final OperationOptions options) {
 
 		if (configuration.getObjectClass().equals(ObjectClassEnum.USER.toString())) {
+			LOG.info("Update started");
 			UpdateUser updateUser = new UpdateUser(configuration);
 			try {
 				updateUser.updateUser(uid.getUidValue(), replaceAttributes);
+				LOG.info("User created");
+
 				Attribute rolesAttribute = replaceAttributes.stream().filter(attribute -> attribute.getName().equals(UserAttrNameEnum.roles.toString())).findFirst().orElse(null);
 				if (rolesAttribute != null && rolesAttribute.getValue() != null) {
+					LOG.info("User has some roles, we will perform groups assigning now");
 					List<String> rolesIds = rolesAttribute.getValue().stream().map(o -> (String) o).collect(Collectors.toList());
 					updateUser.updateGroups(uid.getUidValue(), rolesIds);
+					LOG.info("Groups assigned");
 				}
 			} catch (URISyntaxException e) {
-				throw new ConnectorException("Error during preparing request URL:", e);
+				throw new ConnectorException("Error during preparing request URL: ", e);
 			}
 			return uid;
 		}
@@ -127,12 +135,14 @@ public class MoodleConnector implements Connector,
 			final Uid uid,
 			final OperationOptions options) {
 		if (configuration.getObjectClass().equals(ObjectClassEnum.USER.toString())) {
+			LOG.info("Delete started");
 			DeleteUser deleteUser = new DeleteUser(configuration);
 			try {
 				deleteUser.deleteUser(uid.getUidValue());
+				LOG.info("User deleted");
 				return;
 			} catch (URISyntaxException e) {
-				throw new ConnectorException("Error during preparing request URL:", e);
+				throw new ConnectorException("Error during preparing request URL: ", e);
 			}
 		}
 		throw new ConnectorException("Unsupported operation delete for object class " + objectClass + "");
@@ -183,13 +193,14 @@ public class MoodleConnector implements Connector,
 	@Override
 	public void test() {
 		GetUser getUser = new GetUser(configuration);
+		LOG.info("Trying to perform test to end system, by getting user {0}", configuration.getUser());
 		try {
 			ResponseUser userByUsername = getUser.getUserByField(configuration.getUser(), UserAttrNameEnum.username.toString());
 			if (userByUsername == null) {
 				throw new ConnectionFailedException("Error during request, user not found, but connection probably working");
 			}
 		} catch (URISyntaxException e) {
-			throw new ConnectorException("Error during preparing request URL:", e);
+			throw new ConnectorException("Error during preparing request URL: ", e);
 		}
 	}
 
@@ -231,8 +242,10 @@ public class MoodleConnector implements Connector,
 		MoodleUtils moodleUtils = new MoodleUtils();
 		if (query != null) {
 			if (configuration.getObjectClass().equals(ObjectClassEnum.USER.toString())) {
+				LOG.info("Search single user: {0}", query);
 				searchUser(objectClass, query, handler, getUser, moodleUtils);
 			} else if (configuration.getObjectClass().equals(ObjectClassEnum.GROUP.toString())) {
+				LOG.info("Search single group: {0}", query);
 				searchGroup(objectClass, query, handler, getGroup, moodleUtils);
 			} else {
 				throw new ConnectorException("Unsupported operation delete for object class " + objectClass + "");
@@ -241,17 +254,19 @@ public class MoodleConnector implements Connector,
 			// search all
 			if (configuration.getObjectClass().equals(ObjectClassEnum.USER.toString())) {
 				try {
+					LOG.info("Search all users");
 					List<ResponseUser> users = getUser.getUsers();
 					users.forEach(responseUser -> moodleUtils.handleUser(objectClass, handler, responseUser));
 				} catch (URISyntaxException e) {
-					throw new ConnectorException("Error during preparing request URL:", e);
+					throw new ConnectorException("Error during preparing request URL: ", e);
 				}
 			} else if (configuration.getObjectClass().equals(ObjectClassEnum.GROUP.toString())) {
 				try {
+					LOG.info("Search all groups");
 					List<ResponseGroup> groups = getGroup.getGroups();
 					groups.forEach(responseGroup -> moodleUtils.handleGroup(objectClass, handler, responseGroup));
 				} catch (URISyntaxException e) {
-					throw new ConnectorException("Error during preparing request URL:", e);
+					throw new ConnectorException("Error during preparing request URL: ", e);
 				}
 			} else {
 				throw new ConnectorException("Unsupported operation delete for object class " + objectClass + "");

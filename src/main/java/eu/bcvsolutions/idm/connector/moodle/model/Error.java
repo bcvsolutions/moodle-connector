@@ -2,6 +2,7 @@ package eu.bcvsolutions.idm.connector.moodle.model;
 
 /**
  * @author Roman Kucera
+ * Model class for Error response from API
  */
 public class Error {
 	private String exception;

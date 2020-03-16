@@ -16,6 +16,7 @@ import eu.bcvsolutions.idm.connector.moodle.model.Error;
 
 /**
  * @author Roman Kucera
+ * Class which contain methods for performing requests
  */
 public class Connection {
 
@@ -29,9 +30,11 @@ public class Connection {
 	 */
 	public HttpResponse<String> get(String url) {
 		try {
+			LOG.info("Performing GET request");
 			HttpResponse<String> response = Unirest.get(url)
 					.header("content-type", "application/json")
 					.asString();
+			LOG.info("GET request completed");
 			return response;
 		} catch (UnirestException e) {
 			throw new ConnectionFailedException("Connection failed", e);
@@ -47,10 +50,12 @@ public class Connection {
 	 */
 	public HttpResponse<String> post(String url, Map<String, Object> parameters) {
 		try {
+			LOG.info("Performing POST request");
 			HttpResponse<String> response = Unirest.post(url)
 					.header("Content-Type", "application/x-www-form-urlencoded")
 					.fields(parameters)
 					.asString();
+			LOG.info("POST request completed");
 			return response;
 		} catch (UnirestException e) {
 			throw new ConnectionFailedException("Connection failed", e);
@@ -58,46 +63,15 @@ public class Connection {
 	}
 
 	/**
-	 * Wrapped method for PUT call to end system
-	 *
-	 * @param url
-	 * @param body
+	 * Method for handling error response
+	 * @param response
+	 * @param operation
 	 * @return
 	 */
-	public HttpResponse<String> put(String url, Object body) {
-		try {
-			HttpResponse<String> response = Unirest.put(url)
-					.header("content-type", "application/json")
-					.body(body)
-					.asString();
-			return response;
-		} catch (UnirestException e) {
-			throw new ConnectionFailedException("Connection failed", e);
-		}
-	}
-
-	/**
-	 * Wrapped method for DELETE call to end system
-	 *
-	 * @param url
-	 * @return
-	 */
-	public HttpResponse<String> delete(String url) {
-		try {
-			HttpResponse<String> response = Unirest.delete(url)
-					.header("content-type", "application/json")
-					.asString();
-			return response;
-		} catch (UnirestException e) {
-			throw new ConnectionFailedException("Connection failed", e);
-		}
-	}
-
 	public ConnectorException handleError(HttpResponse<String> response, String operation) {
 		if (response != null) {
 			try {
 				ObjectMapper jsonObjectMapper = new ObjectMapper();
-
 				Error error = jsonObjectMapper.readValue(response.getBody(), Error.class);
 				LOG.error("Operation {0} failed, error code: {1}, exception: {2}, message: {3}, debug: {4}", operation,
 						error.getErrorcode(), error.getException(), error.getMessage(), error.getDebuginfo());

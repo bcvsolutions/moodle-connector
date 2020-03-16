@@ -11,6 +11,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.common.security.GuardedString;
+import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.Attribute;
 
 import com.mashape.unirest.http.HttpResponse;
@@ -25,6 +26,7 @@ import eu.bcvsolutions.idm.connector.moodle.util.MoodleUtils;
 
 /**
  * @author Roman Kucera
+ * Class which perform update of user
  */
 public class UpdateUser {
 	private final String updateUserFunction = "core_user_update_users";
@@ -43,6 +45,12 @@ public class UpdateUser {
 		connection = new Connection();
 	}
 
+	/**
+	 * update single user
+	 * @param id
+	 * @param updateAttributes
+	 * @throws URISyntaxException
+	 */
 	public void updateUser(String id, Set<Attribute> updateAttributes) throws URISyntaxException {
 		URIBuilder uriBuilder = moodleUtils.buildBaseUrl(configuration);
 		uriBuilder.addParameter("wsfunction", updateUserFunction);
@@ -51,6 +59,7 @@ public class UpdateUser {
 		Map<String, Object> parameters = new HashMap<>();
 		parameters.put("users[0][id]", Integer.valueOf(id));
 		updateAttributes.forEach(attribute -> {
+			// Ignored attribute with role, because roles are handled in other method via different endpoint
 			if (attribute.getName().equals(UserAttrNameEnum.roles.toString())) {
 				return;
 			}
@@ -58,7 +67,8 @@ public class UpdateUser {
 			if (attribute.getName().equals("__PASSWORD__")) {
 				key.append("users[0][").append(UserAttrNameEnum.password.toString()).append("]");
 				parameters.put(key.toString(), moodleUtils.getPassword((GuardedString) attribute.getValue().get(0)));
-			} else if (!attribute.getName().equals("__NAME__")){
+			}
+			if (!attribute.getName().equals("__NAME__")){
 				key.append("users[0][").append(attribute.getName()).append("]");
 				List<Object> values = attribute.getValue();
 				if (values.size() == 1) {
@@ -70,16 +80,23 @@ public class UpdateUser {
 		HttpResponse<String> response = connection.post(uriBuilder.build().toString(), parameters);
 
 		if (response.getStatus() != HttpStatus.SC_OK || !response.getBody().equals("null")) {
-			throw connection.handleError(response, "delete");
+			throw connection.handleError(response, "update user");
 		}
 	}
 
+	/**
+	 * Update user's groups
+	 * @param id
+	 * @param roles
+	 * @throws URISyntaxException
+	 */
 	public void updateGroups(String id, List<String> roles) throws URISyntaxException {
 		// Get all users roles which he has on end system
 		GetUser getUser = new GetUser(configuration);
 		ResponseUser user = getUser.getUserByField(id, UserAttrNameEnum.id.toString());
 		List<String> rolesOnSystem = user.getRoles();
 
+		// prepare lists for roles to add and to delete because we need to call different endpoint for each operation
 		List<String> toAdd = new ArrayList<>(roles);
 		List<String> toRemove = new ArrayList<>(rolesOnSystem);
 
@@ -90,6 +107,12 @@ public class UpdateUser {
 		updateRoles(id, toRemove, UpdateGroupsOperationType.delete);
 	}
 
+	/**
+	 * Perform update of roles
+	 * @param id
+	 * @param roles
+	 * @param type
+	 */
 	private void updateRoles(String id, List<String> roles, UpdateGroupsOperationType type) {
 		roles.forEach(role -> {
 			URIBuilder uriBuilder;
@@ -112,8 +135,11 @@ public class UpdateUser {
 				}
 
 				HttpResponse<String> response = connection.post(uriBuilder.build().toString(), parameters);
+				if (response.getStatus() != HttpStatus.SC_OK) {
+					throw connection.handleError(response, "update group");
+				}
 			} catch (URISyntaxException e) {
-				e.printStackTrace();
+				throw new ConnectorException("Error during preparing request URL: ", e);
 			}
 		});
 	}

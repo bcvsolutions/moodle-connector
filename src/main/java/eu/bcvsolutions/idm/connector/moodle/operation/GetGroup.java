@@ -22,6 +22,7 @@ import eu.bcvsolutions.idm.connector.moodle.util.MoodleUtils;
 
 /**
  * @author Roman Kucera
+ * Class for getting group from system
  */
 public class GetGroup {
 	private final String getAllGroupsFunction = "core_cohort_search_cohorts";
@@ -39,6 +40,12 @@ public class GetGroup {
 		connection = new Connection();
 	}
 
+	/**
+	 * Get single global group by id
+	 * @param id
+	 * @return
+	 * @throws URISyntaxException
+	 */
 	public ResponseGroup getGroup(String id) throws URISyntaxException {
 		URIBuilder uriBuilder = moodleUtils.buildBaseUrl(configuration);
 		uriBuilder.addParameter("wsfunction", getOneGroupFunction);
@@ -69,6 +76,11 @@ public class GetGroup {
 		}
 	}
 
+	/**
+	 * Get all global groups
+	 * @return
+	 * @throws URISyntaxException
+	 */
 	public List<ResponseGroup> getGroups() throws URISyntaxException {
 		URIBuilder uriBuilder = moodleUtils.buildBaseUrl(configuration);
 		uriBuilder.addParameter("wsfunction", getAllGroupsFunction);

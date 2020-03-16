@@ -34,11 +34,22 @@ public class MoodleUtils {
 		return new String(result);
 	}
 
+	/**
+	 * get basic URL with token already as part of it
+	 * @param configuration
+	 * @return
+	 * @throws URISyntaxException
+	 */
 	public URIBuilder buildBaseUrl(MoodleConfiguration configuration) throws URISyntaxException {
-		URIBuilder uriBuilder = new URIBuilder(configuration.getEndpoint() + "?wstoken=" + getPassword(configuration.getToken()));
-		return uriBuilder;
+		return new URIBuilder(configuration.getEndpoint() + "?wstoken=" + getPassword(configuration.getToken()));
 	}
 
+	/**
+	 * Transform single user into ResultHandler
+	 * @param objectClass
+	 * @param handler
+	 * @param user
+	 */
 	public void handleUser(ObjectClass objectClass, ResultsHandler handler, ResponseUser user) {
 		ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
 		builder.setUid(new Uid(String.valueOf(user.getId())));
@@ -61,6 +72,12 @@ public class MoodleUtils {
 		handler.handle(builder.build());
 	}
 
+	/**
+	 * Transform single group into ResultHandler
+	 * @param objectClass
+	 * @param handler
+	 * @param group
+	 */
 	public void handleGroup(ObjectClass objectClass, ResultsHandler handler, ResponseGroup group) {
 		ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
 		builder.setUid(new Uid(String.valueOf(group.getId())));

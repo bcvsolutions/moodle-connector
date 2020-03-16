@@ -2,6 +2,7 @@ package eu.bcvsolutions.idm.connector.moodle.model;
 
 /**
  * @author Roman Kucera
+ * Model class for response of single group from API
  */
 public class ResponseGroup {
 	private int id;

@@ -27,6 +27,7 @@ import eu.bcvsolutions.idm.connector.moodle.util.MoodleUtils;
 
 /**
  * @author Roman Kucera
+ *  Class for getting user from system
  */
 public class GetUser {
 	private final String getUserFunction = "core_user_get_users_by_field";
@@ -45,6 +46,13 @@ public class GetUser {
 		connection = new Connection();
 	}
 
+	/**
+	 * Get single user from system by field E.g username, id
+	 * @param value
+	 * @param field
+	 * @return
+	 * @throws URISyntaxException
+	 */
 	public ResponseUser getUserByField(String value, String field) throws URISyntaxException {
 		URIBuilder uriBuilder = moodleUtils.buildBaseUrl(configuration);
 		uriBuilder.addParameter("wsfunction", getUserFunction);
@@ -80,14 +88,22 @@ public class GetUser {
 		}
 	}
 
+	/**
+	 * Get all roles for single user
+	 * @param value
+	 * @param roles
+	 * @throws URISyntaxException
+	 */
 	private void getUserRoles(int value, List<String> roles) throws URISyntaxException {
 		URIBuilder uriBuilderGroup = moodleUtils.buildBaseUrl(configuration);
 		uriBuilderGroup.addParameter("wsfunction", getUserInGroup);
 		uriBuilderGroup.addParameter("moodlewsrestformat", "json");
 
+		// Get all groups from moodle
 		GetGroup getGroup = new GetGroup(configuration);
 		List<ResponseGroup> groups = getGroup.getGroups();
 
+		// Set ids of all groups into parameters so we get the members for all groups via one request
 		Map<String, Object> parameters = new HashMap<>();
 		for (int i = 0; i < groups.size(); i++) {
 			parameters.put("cohortids[" + i + "]", groups.get(i).getId());
@@ -105,6 +121,12 @@ public class GetUser {
 		}
 	}
 
+	/**
+	 * Get groups from response object
+	 * @param value
+	 * @param roles
+	 * @param groupResponse
+	 */
 	private void getUserGroupsFromResponse(int value, List<String> roles, HttpResponse<String> groupResponse) {
 		ObjectMapper mapperGroup = new ObjectMapper();
 		List<ResponseGroupUsers> groupsList;
@@ -124,6 +146,11 @@ public class GetUser {
 		}
 	}
 
+	/**
+	 * Get all users
+	 * @return
+	 * @throws URISyntaxException
+	 */
 	public List<ResponseUser> getUsers() throws URISyntaxException {
 		URIBuilder uriBuilder = moodleUtils.buildBaseUrl(configuration);
 		uriBuilder.addParameter("wsfunction", getAllUserFunction);

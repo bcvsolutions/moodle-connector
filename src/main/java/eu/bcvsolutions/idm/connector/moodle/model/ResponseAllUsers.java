@@ -4,6 +4,7 @@ import java.util.List;
 
 /**
  * @author Roman Kucera
+ * Model class for response of all users from API
  */
 public class ResponseAllUsers {
 	private List<ResponseUser> users;

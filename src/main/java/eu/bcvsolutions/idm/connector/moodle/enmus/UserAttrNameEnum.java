@@ -2,6 +2,7 @@ package eu.bcvsolutions.idm.connector.moodle.enmus;
 
 /**
  * @author Roman Kucera
+ * Enum of names of attributes for user
  */
 public enum UserAttrNameEnum {
 	id,

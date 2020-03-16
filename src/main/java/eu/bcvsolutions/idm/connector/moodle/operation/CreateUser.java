@@ -25,6 +25,7 @@ import eu.bcvsolutions.idm.connector.moodle.util.MoodleUtils;
 
 /**
  * @author Roman Kucera
+ * Class which perform creating of user
  */
 public class CreateUser {
 	private final String createUserFunction = "core_user_create_users";
@@ -41,13 +42,21 @@ public class CreateUser {
 		connection = new Connection();
 	}
 
+	/**
+	 * Create user with specific attributes which are send as parameter
+	 * @param createAttributes
+	 * @return
+	 * @throws URISyntaxException
+	 */
 	public ResponseUser createUser(Set<Attribute> createAttributes) throws URISyntaxException {
 		URIBuilder uriBuilder = moodleUtils.buildBaseUrl(configuration);
 		uriBuilder.addParameter("wsfunction", createUserFunction);
 		uriBuilder.addParameter("moodlewsrestformat", "json");
 
+		// Transform parameters into Map which we can use in request later
 		Map<String, Object> parameters = new HashMap<>();
 		createAttributes.forEach(attribute -> {
+			// Ignored attribute with role, because roles are handled in update
 			if (attribute.getName().equals(UserAttrNameEnum.roles.toString())) {
 				return;
 			}
@@ -55,7 +64,8 @@ public class CreateUser {
 			if (attribute.getName().equals("__PASSWORD__")) {
 				key.append("users[0][").append(UserAttrNameEnum.password.toString()).append("]");
 				parameters.put(key.toString(), moodleUtils.getPassword((GuardedString) attribute.getValue().get(0)));
-			} else if (!attribute.getName().equals("__NAME__")){
+			}
+			if (!attribute.getName().equals("__NAME__")){
 				key.append("users[0][").append(attribute.getName()).append("]");
 				List<Object> values = attribute.getValue();
 				if (values.size() == 1) {

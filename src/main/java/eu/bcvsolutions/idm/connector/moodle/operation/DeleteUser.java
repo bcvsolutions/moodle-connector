@@ -4,7 +4,6 @@ import java.net.URISyntaxException;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
-import org.identityconnectors.common.logging.Log;
 
 import com.mashape.unirest.http.HttpResponse;
 
@@ -14,11 +13,10 @@ import eu.bcvsolutions.idm.connector.moodle.util.MoodleUtils;
 
 /**
  * @author Roman Kucera
+ * Class which delete user
  */
 public class DeleteUser {
 	private final String deleteUserFunction = "core_user_delete_users";
-
-	private static final Log LOG = Log.getLog(DeleteUser.class);
 
 	private MoodleConfiguration configuration;
 	private MoodleUtils moodleUtils;
@@ -39,7 +37,7 @@ public class DeleteUser {
 		HttpResponse<String> response = connection.get(uriBuilder.build().toString());
 
 		if (response.getStatus() != HttpStatus.SC_OK || !response.getBody().equals("null")) {
-			throw connection.handleError(response, "delete");
+			throw connection.handleError(response, "delete user");
 		}
 	}
 }

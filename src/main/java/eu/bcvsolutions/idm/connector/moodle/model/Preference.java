@@ -2,6 +2,7 @@ package eu.bcvsolutions.idm.connector.moodle.model;
 
 /**
  * @author Roman Kucera
+ * Model class for attribute Preference which is in user detail
  */
 public class Preference {
 	private String name;
