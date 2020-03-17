@@ -44,6 +44,10 @@ public class MoodleUtils {
 		return new URIBuilder(configuration.getEndpoint() + "?wstoken=" + getPassword(configuration.getToken()));
 	}
 
+	public String getUrlWithSecuredToken(String url) {
+		return url.substring(0, url.indexOf("=") + 1) + "****" + url.substring(url.indexOf("&"));
+	}
+
 	/**
 	 * Transform single user into ResultHandler
 	 * @param objectClass

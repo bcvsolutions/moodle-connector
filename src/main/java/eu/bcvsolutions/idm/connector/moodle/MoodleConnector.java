@@ -112,7 +112,7 @@ public class MoodleConnector implements Connector,
 			UpdateUser updateUser = new UpdateUser(configuration);
 			try {
 				updateUser.updateUser(uid.getUidValue(), replaceAttributes);
-				LOG.info("User created");
+				LOG.info("User updated");
 
 				Attribute rolesAttribute = replaceAttributes.stream().filter(attribute -> attribute.getName().equals(UserAttrNameEnum.roles.toString())).findFirst().orElse(null);
 				if (rolesAttribute != null && rolesAttribute.getValue() != null) {

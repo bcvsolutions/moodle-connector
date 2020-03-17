@@ -13,6 +13,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 import eu.bcvsolutions.idm.connector.moodle.model.Error;
+import eu.bcvsolutions.idm.connector.moodle.util.MoodleUtils;
 
 /**
  * @author Roman Kucera
@@ -21,6 +22,7 @@ import eu.bcvsolutions.idm.connector.moodle.model.Error;
 public class Connection {
 
 	private static final Log LOG = Log.getLog(Connection.class);
+	private MoodleUtils moodleUtils = new MoodleUtils();
 
 	/**
 	 * Wrapped method for GET call to end system
@@ -30,7 +32,7 @@ public class Connection {
 	 */
 	public HttpResponse<String> get(String url) {
 		try {
-			LOG.info("Performing GET request");
+			LOG.info("Performing GET request to {0}", moodleUtils.getUrlWithSecuredToken(url));
 			HttpResponse<String> response = Unirest.get(url)
 					.header("content-type", "application/json")
 					.asString();
@@ -50,7 +52,7 @@ public class Connection {
 	 */
 	public HttpResponse<String> post(String url, Map<String, Object> parameters) {
 		try {
-			LOG.info("Performing POST request");
+			LOG.info("Performing POST request to {0}", moodleUtils.getUrlWithSecuredToken(url));
 			HttpResponse<String> response = Unirest.post(url)
 					.header("Content-Type", "application/x-www-form-urlencoded")
 					.fields(parameters)
