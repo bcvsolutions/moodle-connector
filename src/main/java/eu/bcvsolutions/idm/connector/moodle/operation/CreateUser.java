@@ -64,8 +64,7 @@ public class CreateUser {
 			if (attribute.getName().equals("__PASSWORD__")) {
 				key.append("users[0][").append(UserAttrNameEnum.password.toString()).append("]");
 				parameters.put(key.toString(), moodleUtils.getPassword((GuardedString) attribute.getValue().get(0)));
-			}
-			if (!attribute.getName().equals("__NAME__")){
+			} else if (!attribute.getName().equals("__NAME__")){
 				key.append("users[0][").append(attribute.getName()).append("]");
 				List<Object> values = attribute.getValue();
 				if (values.size() == 1) {
