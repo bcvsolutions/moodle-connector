@@ -36,13 +36,9 @@ public class UpdateUser {
 	private static final Log LOG = Log.getLog(UpdateUser.class);
 
 	private MoodleConfiguration configuration;
-	private MoodleUtils moodleUtils;
-	private Connection connection;
 
 	public UpdateUser(MoodleConfiguration configuration) {
 		this.configuration = configuration;
-		moodleUtils = new MoodleUtils();
-		connection = new Connection();
 	}
 
 	/**
@@ -52,7 +48,7 @@ public class UpdateUser {
 	 * @throws URISyntaxException
 	 */
 	public void updateUser(String id, Set<Attribute> updateAttributes) throws URISyntaxException {
-		URIBuilder uriBuilder = moodleUtils.buildBaseUrl(configuration);
+		URIBuilder uriBuilder = MoodleUtils.buildBaseUrl(configuration);
 		uriBuilder.addParameter("wsfunction", updateUserFunction);
 		uriBuilder.addParameter("moodlewsrestformat", "json");
 
@@ -66,20 +62,22 @@ public class UpdateUser {
 			StringBuilder key = new StringBuilder();
 			if (attribute.getName().equals("__PASSWORD__")) {
 				key.append("users[0][").append(UserAttrNameEnum.password.toString()).append("]");
-				parameters.put(key.toString(), moodleUtils.getPassword((GuardedString) attribute.getValue().get(0)));
+				parameters.put(key.toString(), MoodleUtils.getPassword((GuardedString) attribute.getValue().get(0)));
 			} else if (!attribute.getName().equals("__NAME__")){
 				key.append("users[0][").append(attribute.getName()).append("]");
 				List<Object> values = attribute.getValue();
-				if (values.size() == 1) {
+				if (values != null && values.size() == 1) {
 					parameters.put(key.toString(), values.get(0));
+				} else {
+					parameters.put(key.toString(), "");
 				}
 			}
 		});
 
-		HttpResponse<String> response = connection.post(uriBuilder.build().toString(), parameters);
+		HttpResponse<String> response = Connection.post(uriBuilder.build().toString(), parameters);
 
 		if (response.getStatus() != HttpStatus.SC_OK || !response.getBody().equals("null")) {
-			throw connection.handleError(response, "update user");
+			throw Connection.handleError(response, "update user");
 		}
 	}
 
@@ -116,7 +114,7 @@ public class UpdateUser {
 		roles.forEach(role -> {
 			URIBuilder uriBuilder;
 			try {
-				uriBuilder = moodleUtils.buildBaseUrl(configuration);
+				uriBuilder = MoodleUtils.buildBaseUrl(configuration);
 				uriBuilder.addParameter("moodlewsrestformat", "json");
 
 				Map<String, Object> parameters = new HashMap<>();
@@ -133,9 +131,9 @@ public class UpdateUser {
 					parameters.put("members[0][userid]", Integer.valueOf(id));
 				}
 
-				HttpResponse<String> response = connection.post(uriBuilder.build().toString(), parameters);
+				HttpResponse<String> response = Connection.post(uriBuilder.build().toString(), parameters);
 				if (response.getStatus() != HttpStatus.SC_OK) {
-					throw connection.handleError(response, "update group");
+					throw Connection.handleError(response, "update group");
 				}
 			} catch (URISyntaxException e) {
 				throw new ConnectorException("Error during preparing request URL: ", e);

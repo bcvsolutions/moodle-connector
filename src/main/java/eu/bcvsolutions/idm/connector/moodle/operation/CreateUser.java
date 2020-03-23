@@ -33,23 +33,20 @@ public class CreateUser {
 	private static final Log LOG = Log.getLog(CreateUser.class);
 
 	private MoodleConfiguration configuration;
-	private MoodleUtils moodleUtils;
-	private Connection connection;
 
 	public CreateUser(MoodleConfiguration configuration) {
 		this.configuration = configuration;
-		moodleUtils = new MoodleUtils();
-		connection = new Connection();
 	}
 
 	/**
 	 * Create user with specific attributes which are send as parameter
+	 *
 	 * @param createAttributes
 	 * @return
 	 * @throws URISyntaxException
 	 */
 	public ResponseUser createUser(Set<Attribute> createAttributes) throws URISyntaxException {
-		URIBuilder uriBuilder = moodleUtils.buildBaseUrl(configuration);
+		URIBuilder uriBuilder = MoodleUtils.buildBaseUrl(configuration);
 		uriBuilder.addParameter("wsfunction", createUserFunction);
 		uriBuilder.addParameter("moodlewsrestformat", "json");
 
@@ -63,26 +60,29 @@ public class CreateUser {
 			StringBuilder key = new StringBuilder();
 			if (attribute.getName().equals("__PASSWORD__")) {
 				key.append("users[0][").append(UserAttrNameEnum.password.toString()).append("]");
-				parameters.put(key.toString(), moodleUtils.getPassword((GuardedString) attribute.getValue().get(0)));
-			} else if (!attribute.getName().equals("__NAME__")){
+				parameters.put(key.toString(), MoodleUtils.getPassword((GuardedString) attribute.getValue().get(0)));
+			} else if (!attribute.getName().equals("__NAME__")) {
 				key.append("users[0][").append(attribute.getName()).append("]");
 				List<Object> values = attribute.getValue();
-				if (values.size() == 1) {
+				if (values != null && values.size() == 1) {
 					parameters.put(key.toString(), values.get(0));
+				} else {
+					parameters.put(key.toString(), "");
 				}
 			}
 		});
 
-		HttpResponse<String> response = connection.post(uriBuilder.build().toString(), parameters);
+		HttpResponse<String> response = Connection.post(uriBuilder.build().toString(), parameters);
 
 		if (response.getStatus() == HttpStatus.SC_OK) {
 			ObjectMapper mapper = new ObjectMapper();
 			List<ResponseUser> responseUsers = null;
 			try {
-				responseUsers = mapper.readValue(response.getBody(), new TypeReference<List<ResponseUser>>(){});
+				responseUsers = mapper.readValue(response.getBody(), new TypeReference<List<ResponseUser>>() {
+				});
 			} catch (JsonProcessingException e) {
 				LOG.error("Error during parsing user response, we will try to parse error now", e);
-				throw connection.handleError(response, "create user");
+				throw Connection.handleError(response, "create user");
 			}
 
 			if (responseUsers.size() == 1) {
@@ -91,7 +91,7 @@ public class CreateUser {
 				LOG.error("Found no or more then 1 result");
 			}
 		} else {
-			throw connection.handleError(response, "create user");
+			throw Connection.handleError(response, "create user");
 		}
 		return null;
 	}

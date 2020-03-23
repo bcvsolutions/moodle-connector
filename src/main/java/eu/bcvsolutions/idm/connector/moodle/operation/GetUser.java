@@ -37,13 +37,9 @@ public class GetUser {
 	private static final Log LOG = Log.getLog(GetUser.class);
 
 	private MoodleConfiguration configuration;
-	private MoodleUtils moodleUtils;
-	private Connection connection;
 
 	public GetUser(MoodleConfiguration configuration) {
 		this.configuration = configuration;
-		moodleUtils = new MoodleUtils();
-		connection = new Connection();
 	}
 
 	/**
@@ -54,13 +50,13 @@ public class GetUser {
 	 * @throws URISyntaxException
 	 */
 	public ResponseUser getUserByField(String value, String field) throws URISyntaxException {
-		URIBuilder uriBuilder = moodleUtils.buildBaseUrl(configuration);
+		URIBuilder uriBuilder = MoodleUtils.buildBaseUrl(configuration);
 		uriBuilder.addParameter("wsfunction", getUserFunction);
 		uriBuilder.addParameter("field", field);
 		uriBuilder.addParameter("values[0]", value);
 		uriBuilder.addParameter("moodlewsrestformat", "json");
 
-		HttpResponse<String> response = connection.get(uriBuilder.build().toString());
+		HttpResponse<String> response = Connection.get(uriBuilder.build().toString());
 
 		if (response.getStatus() == HttpStatus.SC_OK) {
 			ObjectMapper mapper = new ObjectMapper();
@@ -70,7 +66,7 @@ public class GetUser {
 				});
 			} catch (JsonProcessingException e) {
 				LOG.error("Error during parsing user response, we will try to parse error now", e);
-				throw connection.handleError(response, "get user");
+				throw Connection.handleError(response, "get user");
 			}
 			if (!responseUsers.isEmpty()) {
 				ResponseUser responseUser = responseUsers.get(0);
@@ -84,7 +80,7 @@ public class GetUser {
 				return null;
 			}
 		} else {
-			throw connection.handleError(response, "get user");
+			throw Connection.handleError(response, "get user");
 		}
 	}
 
@@ -95,7 +91,7 @@ public class GetUser {
 	 * @throws URISyntaxException
 	 */
 	private void getUserRoles(int value, List<String> roles) throws URISyntaxException {
-		URIBuilder uriBuilderGroup = moodleUtils.buildBaseUrl(configuration);
+		URIBuilder uriBuilderGroup = MoodleUtils.buildBaseUrl(configuration);
 		uriBuilderGroup.addParameter("wsfunction", getUserInGroup);
 		uriBuilderGroup.addParameter("moodlewsrestformat", "json");
 
@@ -110,11 +106,11 @@ public class GetUser {
 		}
 
 		try {
-			HttpResponse<String> groupResponse = connection.post(uriBuilderGroup.build().toString(), parameters);
+			HttpResponse<String> groupResponse = Connection.post(uriBuilderGroup.build().toString(), parameters);
 			if (groupResponse.getStatus() == HttpStatus.SC_OK) {
 				getUserGroupsFromResponse(value, roles, groupResponse);
 			} else {
-				throw connection.handleError(groupResponse, "get group users");
+				throw Connection.handleError(groupResponse, "get group users");
 			}
 		} catch (URISyntaxException e) {
 			LOG.error("Error during building uri for getting groups users", e);
@@ -142,7 +138,7 @@ public class GetUser {
 			}
 		} catch (JsonProcessingException e) {
 			LOG.error("Error during parsing group users response, we will try to parse error now", e);
-			throw connection.handleError(groupResponse, "get group users");
+			throw Connection.handleError(groupResponse, "get group users");
 		}
 	}
 
@@ -152,13 +148,13 @@ public class GetUser {
 	 * @throws URISyntaxException
 	 */
 	public List<ResponseUser> getUsers() throws URISyntaxException {
-		URIBuilder uriBuilder = moodleUtils.buildBaseUrl(configuration);
+		URIBuilder uriBuilder = MoodleUtils.buildBaseUrl(configuration);
 		uriBuilder.addParameter("wsfunction", getAllUserFunction);
 		uriBuilder.addParameter("query", null);
 		uriBuilder.addParameter("capability", null);
 		uriBuilder.addParameter("moodlewsrestformat", "json");
 
-		HttpResponse<String> response = connection.get(uriBuilder.build().toString());
+		HttpResponse<String> response = Connection.get(uriBuilder.build().toString());
 
 		if (response.getStatus() == HttpStatus.SC_OK) {
 			ObjectMapper mapper = new ObjectMapper();
@@ -167,7 +163,7 @@ public class GetUser {
 				responseAllUsers = mapper.readValue(response.getBody(), ResponseAllUsers.class);
 			} catch (JsonProcessingException e) {
 				LOG.error("Error during parsing user response, we will try to parse error now", e);
-				throw connection.handleError(response, "get user");
+				throw Connection.handleError(response, "get user");
 			}
 
 			List<ResponseUser> detailedUsers = new ArrayList<>();
@@ -183,7 +179,7 @@ public class GetUser {
 
 			return detailedUsers;
 		} else {
-			throw connection.handleError(response, "get users");
+			throw Connection.handleError(response, "get users");
 		}
 	}
 }

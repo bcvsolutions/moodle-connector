@@ -31,13 +31,9 @@ public class GetGroup {
 	private static final Log LOG = Log.getLog(GetGroup.class);
 
 	private MoodleConfiguration configuration;
-	private MoodleUtils moodleUtils;
-	private Connection connection;
 
 	public GetGroup(MoodleConfiguration configuration) {
 		this.configuration = configuration;
-		moodleUtils = new MoodleUtils();
-		connection = new Connection();
 	}
 
 	/**
@@ -47,14 +43,14 @@ public class GetGroup {
 	 * @throws URISyntaxException
 	 */
 	public ResponseGroup getGroup(String id) throws URISyntaxException {
-		URIBuilder uriBuilder = moodleUtils.buildBaseUrl(configuration);
+		URIBuilder uriBuilder = MoodleUtils.buildBaseUrl(configuration);
 		uriBuilder.addParameter("wsfunction", getOneGroupFunction);
 		uriBuilder.addParameter("moodlewsrestformat", "json");
 
 		Map<String, Object> parameters = new HashMap<>();
 		parameters.put("cohortids[0]", Integer.valueOf(id));
 
-		HttpResponse<String> response = connection.post(uriBuilder.build().toString(), parameters);
+		HttpResponse<String> response = Connection.post(uriBuilder.build().toString(), parameters);
 
 		if (response.getStatus() == HttpStatus.SC_OK) {
 			ObjectMapper mapper = new ObjectMapper();
@@ -63,7 +59,7 @@ public class GetGroup {
 				responseGroup = mapper.readValue(response.getBody(), new TypeReference<List<ResponseGroup>>(){});
 			} catch (JsonProcessingException e) {
 				LOG.error("Error during parsing group response, we will try to parse error now", e);
-				throw connection.handleError(response, "get group");
+				throw Connection.handleError(response, "get group");
 			}
 
 			if (!responseGroup.isEmpty()) {
@@ -72,7 +68,7 @@ public class GetGroup {
 				return null;
 			}
 		} else {
-			throw connection.handleError(response, "get group");
+			throw Connection.handleError(response, "get group");
 		}
 	}
 
@@ -82,7 +78,7 @@ public class GetGroup {
 	 * @throws URISyntaxException
 	 */
 	public List<ResponseGroup> getGroups() throws URISyntaxException {
-		URIBuilder uriBuilder = moodleUtils.buildBaseUrl(configuration);
+		URIBuilder uriBuilder = MoodleUtils.buildBaseUrl(configuration);
 		uriBuilder.addParameter("wsfunction", getAllGroupsFunction);
 		uriBuilder.addParameter("moodlewsrestformat", "json");
 
@@ -92,7 +88,7 @@ public class GetGroup {
 		parameters.put("context[contextlevel]", "system");
 		parameters.put("context[instanceid]", 0);
 
-		HttpResponse<String> response = connection.post(uriBuilder.build().toString(), parameters);
+		HttpResponse<String> response = Connection.post(uriBuilder.build().toString(), parameters);
 
 		if (response.getStatus() == HttpStatus.SC_OK) {
 			ObjectMapper mapper = new ObjectMapper();
@@ -101,12 +97,12 @@ public class GetGroup {
 				responseAllGroups = mapper.readValue(response.getBody(), ResponseAllGroups.class);
 			} catch (JsonProcessingException e) {
 				LOG.error("Error during parsing group response, we will try to parse error now", e);
-				throw connection.handleError(response, "get groups");
+				throw Connection.handleError(response, "get groups");
 			}
 
 			return responseAllGroups.getCohorts();
 		} else {
-			throw connection.handleError(response, "get groups");
+			throw Connection.handleError(response, "get groups");
 		}
 	}
 }

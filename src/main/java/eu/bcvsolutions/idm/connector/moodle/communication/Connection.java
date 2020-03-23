@@ -22,7 +22,6 @@ import eu.bcvsolutions.idm.connector.moodle.util.MoodleUtils;
 public class Connection {
 
 	private static final Log LOG = Log.getLog(Connection.class);
-	private MoodleUtils moodleUtils = new MoodleUtils();
 
 	/**
 	 * Wrapped method for GET call to end system
@@ -30,9 +29,9 @@ public class Connection {
 	 * @param url
 	 * @return
 	 */
-	public HttpResponse<String> get(String url) {
+	public static HttpResponse<String> get(String url) {
 		try {
-			LOG.info("Performing GET request to {0}", moodleUtils.getUrlWithSecuredToken(url));
+			LOG.info("Performing GET request to {0}", MoodleUtils.getUrlWithSecuredToken(url));
 			HttpResponse<String> response = Unirest.get(url)
 					.header("content-type", "application/json")
 					.asString();
@@ -50,9 +49,9 @@ public class Connection {
 	 * @param parameters
 	 * @return
 	 */
-	public HttpResponse<String> post(String url, Map<String, Object> parameters) {
+	public static HttpResponse<String> post(String url, Map<String, Object> parameters) {
 		try {
-			LOG.info("Performing POST request to {0}", moodleUtils.getUrlWithSecuredToken(url));
+			LOG.info("Performing POST request to {0}", MoodleUtils.getUrlWithSecuredToken(url));
 			HttpResponse<String> response = Unirest.post(url)
 					.header("Content-Type", "application/x-www-form-urlencoded")
 					.fields(parameters)
@@ -70,7 +69,7 @@ public class Connection {
 	 * @param operation
 	 * @return
 	 */
-	public ConnectorException handleError(HttpResponse<String> response, String operation) {
+	public static ConnectorException handleError(HttpResponse<String> response, String operation) {
 		if (response != null) {
 			try {
 				ObjectMapper jsonObjectMapper = new ObjectMapper();

@@ -27,7 +27,7 @@ public class MoodleUtils {
 	 * @param password
 	 * @return
 	 */
-	public String getPassword(GuardedString password) {
+	public static String getPassword(GuardedString password) {
 		GuardedStringAccessor accessor = new GuardedStringAccessor();
 		password.access(accessor);
 		char[] result = accessor.getArray();
@@ -40,11 +40,11 @@ public class MoodleUtils {
 	 * @return
 	 * @throws URISyntaxException
 	 */
-	public URIBuilder buildBaseUrl(MoodleConfiguration configuration) throws URISyntaxException {
+	public static URIBuilder buildBaseUrl(MoodleConfiguration configuration) throws URISyntaxException {
 		return new URIBuilder(configuration.getEndpoint() + "?wstoken=" + getPassword(configuration.getToken()));
 	}
 
-	public String getUrlWithSecuredToken(String url) {
+	public static String getUrlWithSecuredToken(String url) {
 		return url.substring(0, url.indexOf("=") + 1) + "****" + url.substring(url.indexOf("&"));
 	}
 
@@ -54,7 +54,7 @@ public class MoodleUtils {
 	 * @param handler
 	 * @param user
 	 */
-	public void handleUser(ObjectClass objectClass, ResultsHandler handler, ResponseUser user) {
+	public static void handleUser(ObjectClass objectClass, ResultsHandler handler, ResponseUser user) {
 		ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
 		builder.setUid(new Uid(String.valueOf(user.getId())));
 		builder.setName(user.getUsername());
@@ -82,7 +82,7 @@ public class MoodleUtils {
 	 * @param handler
 	 * @param group
 	 */
-	public void handleGroup(ObjectClass objectClass, ResultsHandler handler, ResponseGroup group) {
+	public static void handleGroup(ObjectClass objectClass, ResultsHandler handler, ResponseGroup group) {
 		ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
 		builder.setUid(new Uid(String.valueOf(group.getId())));
 		builder.setName(String.valueOf(group.getId()));

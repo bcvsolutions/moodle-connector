@@ -239,14 +239,13 @@ public class MoodleConnector implements Connector,
 		// search one
 		GetUser getUser = new GetUser(configuration);
 		GetGroup getGroup = new GetGroup(configuration);
-		MoodleUtils moodleUtils = new MoodleUtils();
 		if (query != null) {
 			if (configuration.getObjectClass().equals(ObjectClassEnum.USER.toString())) {
 				LOG.info("Search single user: {0}", query);
-				searchUser(objectClass, query, handler, getUser, moodleUtils);
+				searchUser(objectClass, query, handler, getUser);
 			} else if (configuration.getObjectClass().equals(ObjectClassEnum.GROUP.toString())) {
 				LOG.info("Search single group: {0}", query);
-				searchGroup(objectClass, query, handler, getGroup, moodleUtils);
+				searchGroup(objectClass, query, handler, getGroup);
 			} else {
 				throw new ConnectorException("Unsupported operation delete for object class " + objectClass + "");
 			}
@@ -256,7 +255,7 @@ public class MoodleConnector implements Connector,
 				try {
 					LOG.info("Search all users");
 					List<ResponseUser> users = getUser.getUsers();
-					users.forEach(responseUser -> moodleUtils.handleUser(objectClass, handler, responseUser));
+					users.forEach(responseUser -> MoodleUtils.handleUser(objectClass, handler, responseUser));
 				} catch (URISyntaxException e) {
 					throw new ConnectorException("Error during preparing request URL: ", e);
 				}
@@ -264,7 +263,7 @@ public class MoodleConnector implements Connector,
 				try {
 					LOG.info("Search all groups");
 					List<ResponseGroup> groups = getGroup.getGroups();
-					groups.forEach(responseGroup -> moodleUtils.handleGroup(objectClass, handler, responseGroup));
+					groups.forEach(responseGroup -> MoodleUtils.handleGroup(objectClass, handler, responseGroup));
 				} catch (URISyntaxException e) {
 					throw new ConnectorException("Error during preparing request URL: ", e);
 				}
@@ -275,22 +274,22 @@ public class MoodleConnector implements Connector,
 		}
 	}
 
-	private void searchUser(ObjectClass objectClass, String query, ResultsHandler handler, GetUser getUser, MoodleUtils moodleUtils) {
+	private void searchUser(ObjectClass objectClass, String query, ResultsHandler handler, GetUser getUser) {
 		try {
 			ResponseUser userByUsername = getUser.getUserByField(query, UserAttrNameEnum.id.toString());
 			if (userByUsername != null) {
-				moodleUtils.handleUser(objectClass, handler, userByUsername);
+				MoodleUtils.handleUser(objectClass, handler, userByUsername);
 			}
 		} catch (URISyntaxException e) {
 			throw new ConnectorException("Error during preparing request URL:", e);
 		}
 	}
 
-	private void searchGroup(ObjectClass objectClass, String query, ResultsHandler handler, GetGroup getGroup, MoodleUtils moodleUtils) {
+	private void searchGroup(ObjectClass objectClass, String query, ResultsHandler handler, GetGroup getGroup) {
 		try {
 			ResponseGroup group = getGroup.getGroup(query);
 			if (group != null) {
-				moodleUtils.handleGroup(objectClass, handler, group);
+				MoodleUtils.handleGroup(objectClass, handler, group);
 			}
 		} catch (URISyntaxException e) {
 			throw new ConnectorException("Error during preparing request URL:", e);
