@@ -36,6 +36,7 @@ public class ResponseUser {
 	private String phone2;
 	private String institution;
 	private String url;
+	private String profileurl;
 	private String identity;
 	@JsonIgnore
 	private Preference[] preferences;
@@ -279,5 +280,13 @@ public class ResponseUser {
 
 	public void setRoles(List<String> roles) {
 		this.roles = roles;
+	}
+
+	public String getProfileurl() {
+		return profileurl;
+	}
+
+	public void setProfileurl(String profileurl) {
+		this.profileurl = profileurl;
 	}
 }
