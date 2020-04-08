@@ -152,6 +152,7 @@ public class GetUser {
 		uriBuilder.addParameter("wsfunction", getAllUserFunction);
 		uriBuilder.addParameter("query", null);
 		uriBuilder.addParameter("capability", null);
+		uriBuilder.addParameter("limitnum", "0");
 		uriBuilder.addParameter("moodlewsrestformat", "json");
 
 		HttpResponse<String> response = Connection.get(uriBuilder.build().toString());
