@@ -35,7 +35,7 @@ public class ResponseUser {
 	private String phone1;
 	private String phone2;
 	private String institution;
-	private String profileurl;
+	private String url;
 	private String identity;
 	@JsonIgnore
 	private Preference[] preferences;
@@ -249,12 +249,12 @@ public class ResponseUser {
 		this.institution = institution;
 	}
 
-	public String getProfileurl() {
-		return profileurl;
+	public String getUrl() {
+		return url;
 	}
 
-	public void setProfileurl(String profileurl) {
-		this.profileurl = profileurl;
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 	public String getIdentity() {
